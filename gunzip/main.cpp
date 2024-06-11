@@ -139,6 +139,19 @@ int main() {
   auto parsed_flags = parse_flags(flags);
   dump_flags(flags, parsed_flags);
 
+  auto mtime = std::vector(header.begin() + 4, header.begin() + 8);
+  auto m_time_number = read_uint32(mtime);
+  std::cout << "  Modification Time: " << m_time_number << " ";
+  dump_bytes(mtime);
+
+  auto extra_flags = header.at(8);
+  std::cout << "  Extra Flags: ";
+  dump_bytes(std::vector{extra_flags});
+
+  auto os = header.at(9);
+  std::cout << "  OS: ";
+  dump_bytes(std::vector{os});
+
   if (parsed_flags.fextra) {
     throw "oh no :(";
   }
