@@ -1,3 +1,4 @@
+#include "deflate.h"
 #include <bitset>
 #include <boost/locale.hpp>
 #include <boost/locale/encoding.hpp>
@@ -115,8 +116,15 @@ uint32_t read_uint32(std::vector<char> bytes) {
   return n;
 }
 
-int main() {
-  std::ifstream in("./raw.txt.gz", std::ios_base::in | std::ios_base::binary);
+int main(int argc, char **argv) {
+  std::vector args(argv, argv + argc); // iterator-like usage
+
+  if (args.size() != 2) {
+    std::cerr << "Usage: ./gunzip <filename>" << std::endl;
+    exit(1);
+  }
+
+  std::ifstream in(args.at(1), std::ios_base::in | std::ios_base::binary);
 
   auto header = read_n_bytes(in, 10);
   auto magic = std::vector(header.begin(), header.begin() + 2);
@@ -173,8 +181,8 @@ int main() {
   auto data_and_footer = read_until_eof(in);
   auto data = std::vector(data_and_footer.begin(), data_and_footer.end() - 8);
   auto footer = std::vector(data_and_footer.end() - 8, data_and_footer.end());
-  std::cout << "Data: ";
-  dump_bytes(data);
+  // std::cout << "Data: ";
+  // dump_bytes(data);
 
   std::cout << "Footer:\n";
   auto crc32 = std::vector(footer.begin(), footer.begin() + 4);
@@ -185,4 +193,6 @@ int main() {
 
   auto size = read_uint32(size_bytes);
   std::cout << "  Size: " << size << std::endl;
+
+  deflate(data);
 }
